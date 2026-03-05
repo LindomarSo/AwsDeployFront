@@ -13,6 +13,9 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
 
+    env:
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
     steps:
       # 1. Checkout source code
       - name: Checkout repository
@@ -58,9 +61,9 @@ jobs:
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "text/html"
 
-      # 8. Invalidate CloudFront cache (optional – remove if not using CloudFront)
+      # 8. Invalidate CloudFront cache (opcional – remova se não usar CloudFront)
       - name: Invalidate CloudFront cache
-        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        if: ${{ env.CLOUDFRONT_DISTRIBUTION_ID != '' }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
