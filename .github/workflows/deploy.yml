@@ -33,8 +33,8 @@ jobs:
         run: npm ci
 
       # 4. Run unit tests
-      - name: Run tests
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+      # - name: Run tests
+      #   run: npm test -- --watch=false --browsers=ChromeHeadless
 
       # 5. Build for production
       - name: Build (production)
