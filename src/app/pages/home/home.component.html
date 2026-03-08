@@ -1,0 +1,199 @@
+<div class="page-wrapper">
+  <!-- Particle Background -->
+  <div class="particles" aria-hidden="true">
+    @for (p of [1,2,3,4,5,6,7,8,9,10,11,12]; track p) {
+      <div class="particle" [style]="'--i:' + p"></div>
+    }
+  </div>
+
+  <!-- Glow Orbs -->
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+
+  <main class="main-content">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="logo-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1 class="app-title">
+          <span class="title-gradient">CurriculumAI</span>
+        </h1>
+        <p class="app-subtitle">Otimize seu currículo com inteligência artificial para a vaga dos seus sonhos</p>
+      </div>
+    </header>
+
+    <!-- Main Card -->
+    <div class="glass-card" [class.card-analyzing]="resumeService.isLoading()">
+
+      @if (!resumeService.isLoading() && !resumeService.result()) {
+        <!-- Step 1: Upload Form -->
+        <div class="form-section animate-in">
+          <div class="step-indicators">
+            <div class="step step--active">
+              <span class="step-number">1</span>
+              <span class="step-label">Upload do Currículo</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step">
+              <span class="step-number">2</span>
+              <span class="step-label">Link da Vaga</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step">
+              <span class="step-number">3</span>
+              <span class="step-label">Resultado</span>
+            </div>
+          </div>
+
+          <div class="form-fields">
+            <!-- File Upload -->
+            <div class="field-group">
+              <label class="field-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+                </svg>
+                Seu Currículo
+              </label>
+              <app-file-upload (fileSelected)="onFileSelected($event)" />
+            </div>
+
+            <!-- URL Input -->
+            <div class="field-group">
+              <label class="field-label" for="job-url">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                </svg>
+                Link da Vaga
+              </label>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253"/>
+                </svg>
+                <input
+                  id="job-url"
+                  type="url"
+                  class="url-input"
+                  placeholder="https://www.linkedin.com/jobs/view/..."
+                  [ngModel]="jobUrl()"
+                  (ngModelChange)="jobUrl.set($event)"
+                />
+              </div>
+              <p class="field-hint">Cole o link da vaga do LinkedIn, Gupy, Indeed ou qualquer plataforma</p>
+            </div>
+          </div>
+
+          <!-- Analyze Button -->
+          <button
+            class="analyze-btn"
+            [class.analyze-btn--ready]="canAnalyze()"
+            [disabled]="!canAnalyze()"
+            (click)="onAnalyze()"
+          >
+            <span class="btn-content">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
+              </svg>
+              Analisar e Otimizar com IA
+            </span>
+            @if (canAnalyze()) {
+              <div class="btn-glow"></div>
+            }
+          </button>
+
+          @if (!canAnalyze()) {
+            <p class="analyze-hint">Adicione seu currículo e o link da vaga para continuar</p>
+          }
+        </div>
+      }
+
+      @if (resumeService.isLoading()) {
+        <!-- Step 2: Analyzing -->
+        <div class="analyzing-section animate-in">
+          <div class="ai-animation">
+            <div class="ai-core">
+              <div class="ai-ring ai-ring-1"></div>
+              <div class="ai-ring ai-ring-2"></div>
+              <div class="ai-ring ai-ring-3"></div>
+              <div class="ai-dot"></div>
+            </div>
+          </div>
+
+          <h2 class="analyzing-title">Analisando com IA...</h2>
+          <p class="analyzing-message">{{ resumeService.progress().message }}</p>
+
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar" [style.width.%]="resumeService.progress().percentage"></div>
+          </div>
+          <p class="progress-percentage">{{ resumeService.progress().percentage }}%</p>
+
+          <div class="analyzing-steps">
+            @for (i of [1,2,3,4,5,6,7]; track i) {
+              <div class="analysis-step"
+                [class.step-done]="resumeService.progress().step > i"
+                [class.step-active]="resumeService.progress().step === i">
+                <div class="step-dot"></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (resumeService.result(); as result) {
+        <!-- Step 3: Result -->
+        <div class="result-section animate-in">
+          <div class="result-header">
+            <div class="success-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="result-title">Currículo Otimizado!</h2>
+              <p class="result-subtitle">Seu currículo foi analisado e ajustado com sucesso</p>
+            </div>
+            <button class="reset-btn" (click)="onReset()" title="Nova análise">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+              </svg>
+              Nova Análise
+            </button>
+          </div>
+          <app-result [data]="result" />
+        </div>
+      }
+    </div>
+
+    <!-- Features Row -->
+    @if (!resumeService.isLoading() && !resumeService.result()) {
+      <div class="features-row animate-in">
+        <div class="feature-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Análise por IA</span>
+        </div>
+        <div class="feature-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+          <span>Palavras-chave</span>
+        </div>
+        <div class="feature-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+          <span>Download PDF</span>
+        </div>
+        <div class="feature-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+          <span>Sugestões Detalhadas</span>
+        </div>
+      </div>
+    }
+  </main>
+</div>
