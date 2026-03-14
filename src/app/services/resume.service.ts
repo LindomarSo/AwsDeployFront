@@ -1,11 +1,14 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   ResumeAnalysisRequest,
   ResumeAnalysisResult,
   AnalysisProgress,
+  ResumeApiResponse,
 } from '../models/resume.model';
-import { Observable, of, delay, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
+
+import { API_BASE_URL } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +18,9 @@ export class ResumeService {
   readonly progress = signal<AnalysisProgress>({ step: 0, message: '', percentage: 0 });
   readonly result = signal<ResumeAnalysisResult | null>(null);
   readonly error = signal<string | null>(null);
+
+  private readonly http = inject(HttpClient);
+  private progressTimer: ReturnType<typeof setInterval> | null = null;
 
   private readonly analysisSteps: AnalysisProgress[] = [
     { step: 1, message: 'Fazendo leitura do currículo...', percentage: 15 },
@@ -26,62 +32,90 @@ export class ResumeService {
     { step: 7, message: 'Finalizando ajustes...', percentage: 100 },
   ];
 
-  constructor(private http: HttpClient) {}
-
   analyzeResume(request: ResumeAnalysisRequest): void {
     this.isLoading.set(true);
     this.error.set(null);
     this.result.set(null);
 
-    // Simulate step-by-step progress (replace with real API call)
-    this.simulateProgress().then(() => {
-      const mockResult: ResumeAnalysisResult = {
-        originalScore: 42,
-        adjustedScore: 87,
-        matchedKeywords: ['Angular', 'TypeScript', 'RxJS', 'REST API', 'Git'],
-        missingKeywords: ['AWS', 'Docker', 'CI/CD', 'Scrum', 'Jest'],
-        jobTitle: 'Desenvolvedor Frontend Sênior',
-        company: this.extractCompanyFromUrl(request.jobUrl),
-        suggestions: [
-          {
-            section: 'Resumo Profissional',
-            original: 'Desenvolvedor frontend com experiência em Angular.',
-            improved:
-              'Desenvolvedor Frontend Sênior com +5 anos de experiência em Angular, TypeScript e AWS, entregando soluções escaláveis com foco em performance e CI/CD.',
-            impact: 'high',
-          },
-          {
-            section: 'Habilidades Técnicas',
-            original: 'Angular, TypeScript, HTML, CSS',
-            improved:
-              'Angular 17+, TypeScript, RxJS, AWS (S3/EC2), Docker, CI/CD (GitHub Actions), Jest, SCSS, REST/GraphQL APIs',
-            impact: 'high',
-          },
-          {
-            section: 'Experiência – Empresa XYZ',
-            original: 'Desenvolvi features para aplicação web.',
-            improved:
-              'Desenvolvi e implantei 12+ features críticas em aplicação Angular com 50k usuários, reduzindo o tempo de carregamento em 35% através de lazy loading e otimização de bundle.',
-            impact: 'medium',
-          },
-        ],
-        adjustedContent: 'Currículo ajustado e pronto para download...',
-      };
+    const formData = new FormData();
+    formData.append('file', request.resumeFile, request.resumeFile.name);
+    formData.append('jobVacancyUrl', request.jobUrl);
 
-      this.result.set(mockResult);
-      this.isLoading.set(false);
-    });
+    this.startProgress();
+
+    this.http
+      .post<ResumeApiResponse>(`${API_BASE_URL}/resume/analyze`, formData)
+      .pipe(
+        finalize(() => {
+          this.stopProgress();
+          this.isLoading.set(false);
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.progress.set(this.analysisSteps[this.analysisSteps.length - 1]);
+          this.result.set(this.mapResult(response, request));
+        },
+        error: (error: { error?: { message?: string }; status?: number }) => {
+          const message =
+            error.error?.message ??
+            (error.status === 401
+              ? 'Sua sessão expirou. Faça login novamente para analisar o currículo.'
+              : 'Não foi possível analisar o currículo na API local.');
+
+          this.error.set(message);
+        },
+      });
   }
 
-  private async simulateProgress(): Promise<void> {
-    for (const step of this.analysisSteps) {
-      this.progress.set(step);
-      await this.sleep(600 + Math.random() * 400);
+  private startProgress(): void {
+    let currentIndex = 0;
+    this.progress.set(this.analysisSteps[currentIndex]);
+
+    this.progressTimer = setInterval(() => {
+      currentIndex = Math.min(currentIndex + 1, this.analysisSteps.length - 2);
+      this.progress.set(this.analysisSteps[currentIndex]);
+    }, 900);
+  }
+
+  private stopProgress(): void {
+    if (!this.progressTimer) {
+      return;
     }
+
+    clearInterval(this.progressTimer);
+    this.progressTimer = null;
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private mapResult(
+    response: ResumeApiResponse | null | undefined,
+    request: ResumeAnalysisRequest
+  ): ResumeAnalysisResult {
+    const adjustedContent =
+      response?.improvedResumeContent ??
+      response?.adjustedContent ??
+      response?.optimizedContent ??
+      response?.generatedResume ??
+      '';
+    const adjustedFileBase64 = response?.improvedResumePdf ?? response?.fileBase64;
+
+    return {
+      analysisId: response?.analysisId,
+      status: response?.status,
+      originalScore: response?.originalScore ?? response?.currentScore ?? 0,
+      adjustedScore: response?.adjustedScore ?? response?.optimizedScore ?? 0,
+      matchedKeywords: response?.matchedKeywords ?? [],
+      missingKeywords: response?.missingKeywords ?? [],
+      suggestions: response?.suggestions ?? [],
+      adjustedContent,
+      jobTitle: response?.jobTitle ?? 'Vaga analisada',
+      company: response?.company ?? this.extractCompanyFromUrl(request.jobUrl),
+      adjustedFileName:
+        response?.fileName ?? (adjustedFileBase64 ? 'curriculo-otimizado.pdf' : undefined),
+      adjustedFileContentType:
+        response?.contentType ?? (adjustedFileBase64 ? 'application/pdf' : undefined),
+      adjustedFileBase64,
+    };
   }
 
   private extractCompanyFromUrl(url: string): string {
@@ -98,6 +132,7 @@ export class ResumeService {
   }
 
   reset(): void {
+    this.stopProgress();
     this.result.set(null);
     this.error.set(null);
     this.isLoading.set(false);

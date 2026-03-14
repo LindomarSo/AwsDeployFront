@@ -2,6 +2,26 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
 
+## Local API integration
+
+The frontend is configured to call the local API at `https://localhost:7296`.
+
+### Auth endpoints
+
+- `POST /auth/register`
+- `POST /auth/login`
+
+The home page now exposes login and register actions. After login, the token is stored in `localStorage` and sent automatically as a Bearer token on requests to `POST /resume`.
+
+### Resume endpoint
+
+The resume flow sends a `multipart/form-data` request to `POST /resume` with:
+
+- `jobUrl`
+- `resumeFile`
+
+If your backend uses different field names or a different response contract, adjust the mapping in `src/app/services/resume.service.ts`.
+
 ## Development server
 
 To start a local development server, run:

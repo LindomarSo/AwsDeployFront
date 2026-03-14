@@ -4,6 +4,8 @@ export interface ResumeAnalysisRequest {
 }
 
 export interface ResumeAnalysisResult {
+  analysisId?: string;
+  status?: string;
   originalScore: number;
   adjustedScore: number;
   matchedKeywords: string[];
@@ -12,6 +14,9 @@ export interface ResumeAnalysisResult {
   adjustedContent: string;
   jobTitle: string;
   company: string;
+  adjustedFileName?: string;
+  adjustedFileContentType?: string;
+  adjustedFileBase64?: string;
 }
 
 export interface Suggestion {
@@ -27,4 +32,26 @@ export interface AnalysisProgress {
   step: number;
   message: string;
   percentage: number;
+}
+
+export interface ResumeApiResponse {
+  analysisId?: string;
+  status?: string;
+  improvedResumePdf?: string;
+  improvedResumeContent?: string;
+  originalScore?: number;
+  adjustedScore?: number;
+  currentScore?: number;
+  optimizedScore?: number;
+  matchedKeywords?: string[];
+  missingKeywords?: string[];
+  suggestions?: Suggestion[];
+  adjustedContent?: string;
+  optimizedContent?: string;
+  generatedResume?: string;
+  jobTitle?: string;
+  company?: string;
+  fileName?: string;
+  contentType?: string;
+  fileBase64?: string;
 }

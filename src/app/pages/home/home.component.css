@@ -133,6 +133,165 @@
 }
 
 /* ===========================
+   Auth Section
+=========================== */
+.auth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.auth-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #34d399;
+}
+.auth-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #f8fafc;
+}
+.auth-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  max-width: 280px;
+  padding: 0.25rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.auth-toggle-btn {
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.auth-toggle-btn--active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(59, 130, 246, 0.25));
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.18);
+}
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.auth-grid .field-group:first-child:nth-last-child(3) {
+  grid-column: 1 / -1;
+}
+.auth-input {
+  padding-left: 1rem;
+}
+.auth-submit {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 0.95rem 1.1rem;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.auth-help {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+.auth-help--success {
+  color: #6ee7b7;
+}
+.session-pill {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+}
+.session-name,
+.session-email {
+  margin: 0;
+}
+.session-name {
+  color: #ecfeff;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.session-email {
+  color: #99f6e4;
+  font-size: 0.76rem;
+}
+.session-action {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  background: rgba(255,255,255,0.08);
+  color: #f8fafc;
+  cursor: pointer;
+}
+.status-banner {
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+}
+.status-banner--error {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.18);
+}
+.status-banner--success {
+  background: rgba(16, 185, 129, 0.08);
+  color: #86efac;
+  border-color: rgba(16, 185, 129, 0.18);
+}
+.locked-state {
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(148, 163, 184, 0.24);
+}
+.locked-state__title,
+.locked-state__text {
+  margin: 0;
+}
+.locked-state__title {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+.locked-state__text {
+  margin-top: 0.45rem;
+  color: #94a3b8;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+/* ===========================
    Step Indicators
 =========================== */
 .step-indicators {
@@ -348,4 +507,6 @@
   .step-label { display: none; }
   .result-header { flex-wrap: wrap; }
   .reset-btn { margin-left: 0; }
+  .auth-grid { grid-template-columns: 1fr; }
+  .session-pill { width: 100%; justify-content: space-between; }
 }

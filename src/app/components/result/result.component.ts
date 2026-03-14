@@ -9,6 +9,7 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
   template: `
     <div class="result-wrapper">
       <!-- Score Section -->
+      @if (hasScoreData()) {
       <div class="score-section">
         <div class="score-card score-before">
           <p class="score-label">Pontuação Anterior</p>
@@ -41,6 +42,18 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
           </div>
         </div>
       </div>
+      }
+
+      @if (data().analysisId || data().status) {
+        <div class="analysis-meta">
+          @if (data().status) {
+            <span class="analysis-badge">Status: {{ data().status }}</span>
+          }
+          @if (data().analysisId) {
+            <span class="analysis-id">Análise: {{ data().analysisId }}</span>
+          }
+        </div>
+      }
 
       <!-- Job Info -->
       <div class="job-info-badge">
@@ -52,6 +65,7 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
       </div>
 
       <!-- Keywords -->
+      @if (hasKeywordData()) {
       <div class="keywords-section">
         <div class="keyword-group">
           <h4 class="keyword-title keyword-title--match">
@@ -76,16 +90,18 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
           </div>
         </div>
       </div>
+      }
 
       <!-- Suggestions -->
+      @if (hasSuggestions()) {
       <div class="suggestions-section">
         <h3 class="suggestions-title">Sugestões de Melhoria</h3>
         <div class="suggestions-list">
           @for (suggestion of data().suggestions; track suggestion.section) {
-            <div class="suggestion-card" [ngClass]="'suggestion-card--' + suggestion.impact">
+            <div [class]="'suggestion-card suggestion-card--' + suggestion.impact">
               <div class="suggestion-header">
                 <span class="suggestion-section">{{ suggestion.section }}</span>
-                <span class="suggestion-impact" [ngClass]="'impact--' + suggestion.impact">
+                <span [class]="'suggestion-impact impact--' + suggestion.impact">
                   {{ impactLabel(suggestion.impact) }}
                 </span>
               </div>
@@ -103,14 +119,24 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
           }
         </div>
       </div>
+      }
+
+      @if (data().adjustedContent) {
+        <div class="content-section">
+          <h3 class="suggestions-title">Conteúdo Otimizado</h3>
+          <div class="content-card">
+            <p>{{ data().adjustedContent }}</p>
+          </div>
+        </div>
+      }
 
       <!-- Download Button -->
-      <button class="download-btn" (click)="downloadResume()">
+      <button class="download-btn" (click)="downloadResume()" [disabled]="!canDownload()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        Baixar Currículo Ajustado
+        {{ canDownload() ? 'Baixar Currículo Ajustado' : 'Sem arquivo para download' }}
         <div class="btn-shine"></div>
       </button>
     </div>
@@ -135,6 +161,15 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
     .score-arrow { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; color: #8b5cf6; }
     .score-arrow svg { width: 28px; height: 28px; }
     .score-improvement { font-size: 0.9rem; font-weight: 700; color: #10b981; }
+    .analysis-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .analysis-badge, .analysis-id {
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.76rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: #cbd5e1;
+    }
     .job-info-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 999px; color: #a78bfa; font-size: 0.875rem; font-weight: 500; align-self: flex-start; }
     .job-info-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
     .keywords-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -173,6 +208,20 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
     .suggestion-diff--after .diff-label { color: #6ee7b7; }
     .suggestion-diff p { font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.6; }
     .suggestion-diff--after p { color: #cbd5e1; }
+    .content-section { display: flex; flex-direction: column; gap: 0.75rem; }
+    .content-card {
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 1rem;
+    }
+    .content-card p {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
     .download-btn {
       position: relative; overflow: hidden;
       display: flex; align-items: center; justify-content: center; gap: 0.625rem;
@@ -186,6 +235,12 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
     .download-btn svg { width: 20px; height: 20px; }
     .download-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124, 58, 237, 0.5); }
     .download-btn:active { transform: translateY(0); }
+    .download-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+    }
+    .download-btn:disabled:hover { transform: none; }
     .btn-shine {
       position: absolute; top: -50%; left: -60%; width: 40%; height: 200%;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
@@ -201,19 +256,62 @@ import { ResumeAnalysisResult } from '../../models/resume.model';
 export class ResultComponent {
   readonly data = input.required<ResumeAnalysisResult>();
 
+  hasScoreData(): boolean {
+    const data = this.data();
+    return data.originalScore > 0 || data.adjustedScore > 0;
+  }
+
+  hasKeywordData(): boolean {
+    const data = this.data();
+    return data.matchedKeywords.length > 0 || data.missingKeywords.length > 0;
+  }
+
+  hasSuggestions(): boolean {
+    return this.data().suggestions.length > 0;
+  }
+
+  canDownload(): boolean {
+    const data = this.data();
+    return Boolean(data.adjustedFileBase64 || data.adjustedContent);
+  }
+
   impactLabel(impact: 'high' | 'medium' | 'low'): string {
     const map = { high: 'Alto Impacto', medium: 'Médio Impacto', low: 'Baixo Impacto' };
     return map[impact];
   }
 
   downloadResume(): void {
-    // TODO: integrate real download from API
-    const blob = new Blob(['Currículo Ajustado - conteúdo gerado pela IA'], { type: 'text/plain' });
+    const data = this.data();
+
+    if (!this.canDownload()) {
+      return;
+    }
+
+    const blob = data.adjustedFileBase64
+      ? this.base64ToBlob(
+          data.adjustedFileBase64,
+          data.adjustedFileContentType ?? 'application/octet-stream'
+        )
+      : new Blob([data.adjustedContent || 'Currículo Ajustado - conteúdo gerado pela IA'], {
+          type: data.adjustedFileContentType ?? 'text/plain;charset=utf-8',
+        });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'curriculo-ajustado.txt';
+    a.download = data.adjustedFileName ?? 'curriculo-ajustado.txt';
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  private base64ToBlob(base64: string, contentType: string): Blob {
+    const sanitized = base64.includes(',') ? base64.split(',')[1] : base64;
+    const byteCharacters = atob(sanitized);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let index = 0; index < byteCharacters.length; index += 1) {
+      byteNumbers[index] = byteCharacters.charCodeAt(index);
+    }
+
+    return new Blob([new Uint8Array(byteNumbers)], { type: contentType });
   }
 }
